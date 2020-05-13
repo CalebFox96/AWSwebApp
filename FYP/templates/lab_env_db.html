@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Patient Health Monitor</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+/* Style the body */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+/* Header/logo Title */
+.header {
+  padding: 80px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+}
+
+/* Increase the font size of the heading */
+.header h1 {
+  font-size: 40px;
+}
+
+/* Style the top navigation bar */
+.navbar {
+  overflow: hidden;
+  background-color: #333;
+}
+
+/* Style the navigation bar links */
+.navbar a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+
+/* Right-aligned link */
+.navbar a.right {
+  float: right;
+}
+
+/* Change color on hover */
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Column container */
+.row {  
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+}
+
+/* Create two unequal columns that sits next to each other */
+/* Sidebar/left column */
+.side {
+  -ms-flex: 30%; /* IE10 */
+  flex: 30%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
+/* Main column */
+.main {   
+  -ms-flex: 70%; /* IE10 */
+  flex: 70%;
+  background-color: white;
+  padding: 20px;
+}
+
+/* Fake image, just for this example */
+.fakeimg {
+  background-color: #aaa;
+  width: 100%;
+  padding: 20px;
+}
+
+/* Footer */
+.footer {
+  padding: 20px;
+  text-align: center;
+  background: #ddd;
+}
+
+/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 700px) {
+  .row {   
+    flex-direction: column;
+  }
+}
+
+/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+@media screen and (max-width: 400px) {
+  .navbar a {
+    float: none;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Patient Health Monitor</h1>
+  <p>Historical Data</p>
+</div>
+
+<div class="navbar">
+  <a href="/sensor">Live Sensor Data</a>
+</div>
+
+<div class="row">
+  <div class="side">
+    <h2>Historical Data</h2>
+              <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>&deg;C</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in temp %}
+                <tr>
+                  <td>{{row[0]}}</td>
+                  <td>{{'%0.2f'|format(row[2])}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <h2>Humidities</h2>
+            <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in hum %}
+                <tr>
+                  <td>{{row[0]}}</td>
+                  <td>{{'%0.2f'|format(row[2])}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            
+            <h2>Beats per Minute</h2>
+            <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>bpm/60s</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in beats %}
+                <tr>
+                  <td>{{row[0]}}</td>
+                  <td>{{'%0.2f'|format(row[2])}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <h2>Blood Pressure</h2>
+            <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>pAh</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in bp %}
+                <tr>
+                  <td>{{row[0]}}</td>
+                  <td>{{'%0.2f'|format(row[2])}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+  </div>
+  <div class="main">
+            <form id="datetime_range" action="/" method="GET"> 
+              <label for="from">From date</label>
+              <input class="u-full-width" id="datetimepicker1" type="text" value="{{from_date}}" name="from">       
+              <label for="to">To date</label>           
+              <input class="u-full-width" id="datetimepicker2" type="text" value="{{to_date}}" name="to">
+                
+              <input class="button-primary" type="submit" value="Submit" style="position:relative; top: 28px" id="submit_button" />
+            </form> 
+
+    <h2>Graphed Data</h2>
+            <div class="fakeimg">
+              <div id="chart_temps"></div>
+              <div id="chart_humid"></div>
+              <div id="chart_bpm"></div>
+              <div id="chart_bp"></div>
+            </div>
+  </div>
+</div>
+
+<div class="footer">
+  <h2>Patient Health Monitor G00327455</h2>
+</div>
+
+</body>
+  <script src="//code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.17/jquery.datetimepicker.min.css"/ >
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.17/jquery.datetimepicker.full.min.js"></script>
+  <script>
+    jQuery('#datetimepicker1').datetimepicker(
+      {
+        format:'Y-m-d H:i',
+        defaultDate:'{{from_date}}'
+      });
+    jQuery('#datetimepicker2').datetimepicker({
+        format:'Y-m-d H:i',
+        defaultDate:'{{to_date}}'
+      });
+      jQuery("#range_select input[type=radio]").click(function(){ 
+        jQuery("#range_select").submit();
+      });
+  </script>
+
+  <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['corechart']}]}"></script>
+
+  <script>
+    google.load('visualization', '1', {packages: ['corechart']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Time');  
+      data.addColumn('number', 'Temperature');      
+      data.addRows([
+          {% for row in temp %} 
+            [new Date({{row[0][0:4]}},{{row[0][5:7]}},{{row[0][8:10]}},{{row[0][11:13]}},{{row[0][14:16]}}),
+                {{'%0.2f'|format(row[2])}}],
+          {% endfor %}
+        ]);
+
+      var options = {
+        width: 600,
+        height: 563,
+        hAxis: {
+          title: "Date",
+          gridlines: { count: {{temp_items}}, color: '#CCC' },
+          format: 'dd-MMM-yyyy HH:mm' },
+        vAxis: {
+          title: 'Degrees'
+        },
+        title: 'Temperature',
+        curveType: 'function'  //Makes line curved
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_temps'));
+
+      chart.draw(data, options);
+
+    }
+  </script>
+
+  <script>
+    google.load('visualization', '1', {packages: ['corechart']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Time');  
+      data.addColumn('number', 'Humidity');      
+      data.addRows([
+          {% for row in hum %}
+            [new Date({{row[0][0:4]}},{{row[0][5:7]}},{{row[0][8:10]}},{{row[0][11:13]}},{{row[0][14:16]}}),{{'%0.2f'|format(row[2])}}],
+          {% endfor %}
+        ]);
+
+      var options = {
+        width: 600,
+        height: 563,
+        hAxis: {
+          title: "Date",
+          gridlines: { count: {{hum_items}}, color: '#CCC' },
+          format: 'dd-MMM-yyyy HH:mm'        },
+        vAxis: {
+          title: 'Percent'
+        },
+        title: 'Humidity',
+        curveType: 'function'  //Makes line curved
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_humid'));
+
+      chart.draw(data, options);
+
+    }
+
+  </script>  
+  
+  <script>
+    google.load('visualization', '1', {packages: ['corechart']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Time');  
+      data.addColumn('number', 'Beats per Minute');      
+      data.addRows([
+          {% for row in beats %}
+            [new Date({{row[0][0:4]}},{{row[0][5:7]}},{{row[0][8:10]}},{{row[0][11:13]}},{{row[0][14:16]}}),{{'%0.2f'|format(row[2])}}],
+          {% endfor %}
+        ]);
+
+      var options = {
+        width: 600,
+        height: 563,
+        hAxis: {
+          title: "Date",
+          gridlines: { count: {{bpm_items}}, color: '#CCC' },
+          format: 'dd-MMM-yyyy HH:mm'        },
+        vAxis: {
+          title: 'beats'
+        },
+        title: 'BPM',
+        curveType: 'function'  //Makes line curved
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_bpm'));
+
+      chart.draw(data, options);
+
+    }
+
+  </script> 
+  
+  <script>
+    google.load('visualization', '1', {packages: ['corechart']});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Time');  
+      data.addColumn('number', 'Beats per Minute');      
+      data.addRows([
+          {% for row in bp %}
+            [new Date({{row[0][0:4]}},{{row[0][5:7]}},{{row[0][8:10]}},{{row[0][11:13]}},{{row[0][14:16]}}),{{'%0.2f'|format(row[2])}}],
+          {% endfor %}
+        ]);
+
+      var options = {
+        width: 600,
+        height: 563,
+        hAxis: {
+          title: "Date",
+          gridlines: { count: {{bp_items}}, color: '#CCC' },
+          format: 'dd-MMM-yyyy HH:mm'        },
+        vAxis: {
+          title: 'beats'
+        },
+        title: 'Blood Pressure',
+        curveType: 'function'  //Makes line curved
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_bp'));
+
+      chart.draw(data, options);
+
+    }
+
+  </script> 
+</html>
